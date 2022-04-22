@@ -1,13 +1,18 @@
 import requests
 from bs4 import BeautifulSoup
-import mail
+import mail_setting
 from time import sleep
+# from resources.headers import header_list
+# from resources.asin import asin_list
 
-URL = "https://www.amazon.es/echo-dot-3-generacion-altavoz-inteligente-con-alexa-tela-de-color-antracita/dp/B07PHPXHQS/ref=sr_1_2?crid=ZXRZX6YY1RLG&keywords=alexa&qid=1648733243&sprefix=alexa%2Caps%2C134&sr=8-2"
+ASIN1 = "B07PHPXHQS" # (echo-dot-3-generacion-altavoz-inteligente-con-alexa)
+ASIN2 = " "
+
+URL = f"https://www.amazon.es/dp/{ASIN1}"
 HEADER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"}
 
 
-def getprice():
+def getPrice():
     page = requests.get(URL, headers=HEADER)
     soup = BeautifulSoup(page.content, "lxml")
     price = soup.find(id="corePriceDisplay_desktop_feature_div").get_text()
@@ -34,17 +39,17 @@ def main():
     try:
         open("price.txt")
     except FileNotFoundError:
-        writeFile(getprice())
+        writeFile(getPrice())
 
     while(True):
-        oldprice = readFile()
-        newprice = getprice()
+        oldPrice = readFile()
+        newPrice = getPrice()
 
-        if float(newprice) < float(oldprice) - 10:
+        if float(newPrice) < float(oldPrice) - 10:
             message = "Su producto ha sido rebajado a " + \
-                str(newprice) + " euros. \n" + "URL: " + str(URL)
-            mail.sendemail(message)
-            writeFile(newprice)
+                str(newPrice) + " euros. \n" + "URL: " + str(URL)
+            mail_setting.sendemail(message)
+            writeFile(newPrice)
             print("Mail sent \n")
 
         sleep(3600)
